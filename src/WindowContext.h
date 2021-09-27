@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "PuzzGen.h"
 
 namespace PPGViz
 {
@@ -21,6 +22,7 @@ namespace PPGViz
 
 		bool shouldClose() const;
 
+		void drawPuzzle(PPG::Puzzle& P);
 	private:
 		GLFWwindow* window;
 		ImVec4 clear_color;
