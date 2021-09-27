@@ -1,0 +1,17 @@
+build/
+.vs/
+out/
+include/
+lib/
+**/*.vcxproj*
+*.sln
+**/CMakeFiles
+**/cmake_install.cmake
+**/CMakeSettings.json
+**/CTestTestfile.cmake
+
+# premake
+Makefile
+*.make
+bin/
+obj/

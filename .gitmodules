@@ -1,0 +1,6 @@
+[submodule "vendor/ppg-yaml"]
+	path = vendor/ppg-yaml
+	url = https://github.com/dAmihl/ppg-yaml
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/TheCherno/glfw.git
