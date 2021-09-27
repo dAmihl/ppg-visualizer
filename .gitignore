@@ -14,4 +14,5 @@ lib/
 Makefile
 *.make
 bin/
+bin-int/
 obj/

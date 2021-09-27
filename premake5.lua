@@ -14,14 +14,21 @@ project "ppg-visualizer"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	links {"PPG", "PPG-YAML", "yaml-cpp", "GLFW"}
-	files {"src/**.h", "src/**.cpp"}
+	links {"PPG", "PPG-YAML", "yaml-cpp", "GLFW", "OpenGL32"}
+	files {
+		"src/**.h", 
+		"src/**.cpp",
+		"vendor/imgui/**.cpp",
+		"vendor/imgui/**.h"
+	}
+	
 	
 	includedirs {
 		"vendor/ppg-yaml/src", 
 		"vendor/ppg-yaml/vendor/yaml-cpp/include", 
 		"vendor/ppg-yaml/vendor/ppg-core/src",
-		"vendor/glfw/include"
+		"vendor/glfw/include",
+		"vendor/imgui"
 	}
 	
 	filter "configurations:Debug"
