@@ -7,9 +7,14 @@
 #include "imgui_impl_opengl3.h"
 #include "PuzzGen.h"
 #include <math.h>
+#include <algorithm>
 
 namespace PPGViz
 {
+
+	constexpr float NodeSize = 30.f;
+	constexpr float NodeSpacing = NodeSize * 2 + 30.f;
+
 	class WindowContext
 	{
 

@@ -81,7 +81,7 @@ namespace PPGViz
 
 	void drawNode(PPG::Ptr<PPG::Node>& n, ImVec2 pos, ImDrawList* draw_list)
 	{
-		float radius = 20.f;
+		float radius = NodeSize;
 		ImU32 colInactive = ImGui::GetColorU32(IM_COL32(255, 255, 255, 255));
 		ImU32 colActive = ImGui::GetColorU32(IM_COL32(255, 0, 0, 255));
 		ImU32 colComplete = ImGui::GetColorU32(IM_COL32(0, 255, 0, 255));
@@ -95,7 +95,11 @@ namespace PPGViz
 		{
 			col = colComplete;
 		}
-		draw_list->AddCircleFilled(pos, radius, col);
+		draw_list->AddCircle(pos, NodeSize, col);
+		//draw_list->AddRect(pos, ImVec2{ pos.x + size, pos.y + size }, col);
+		PPG::Str desc = n->getRelatedObject().getObjectName() + " : " + n->getRelatedObject().getCurrentState().getName();
+		draw_list->AddText(ImVec2{ pos.x + 5, pos.y + NodeSize / 2 }, col, desc.c_str());
+		
 	}
 
 	void drawArrow(ImVec2 from, ImVec2 to, ImDrawList* draw_list)
@@ -107,18 +111,22 @@ namespace PPGViz
 		float dirY = to.y - from.y;
 		float len = dirX * dirX + dirY * dirY;
 		ImVec2 arrowDir{ dirX / sqrt(len), dirY / sqrt(len) };
-		ImVec2 headStart{ to.x - 20 * arrowDir.x, to.y - 20 * arrowDir.y };
-		ImVec2 fromStart{ from.x + 20 * arrowDir.x, from.y + 20 * arrowDir.y };
+		ImVec2 headStart{ to.x - NodeSize * arrowDir.x, to.y - NodeSize * arrowDir.y };
+		ImVec2 fromStart{ from.x + NodeSize * arrowDir.x, from.y + NodeSize * arrowDir.y };
 		draw_list->AddLine(fromStart, headStart, colorWhite, 1.0f);
 		draw_list->AddRectFilled(ImVec2{ headStart.x - 2.5f, headStart.y - 2.5f }, ImVec2{ headStart.x + 2.5f, headStart.y + 2.5f }, colorBlue);
 	}
 
 
-	void drawSubgraph(PPG::Puzzle& P, std::unordered_map<PPG::Ptr<PPG::Node>, ImVec2>& nodePosMap, PPG::Vec<PPG::Ptr<PPG::Node>>& fol, ImDrawList* draw_list, ImVec2 center)
+	void drawSubgraph(PPG::Puzzle& P, std::unordered_map<PPG::Ptr<PPG::Node>, ImVec2>& nodePosMap, PPG::Vec<PPG::Ptr<PPG::Node>>& fol, ImDrawList* draw_list, ImVec2 center, size_t col, size_t row, float width )
 	{
 		size_t num = fol.size();
-		size_t col = 0;
-		float ox = center.x - (num / 2) * 40;
+		
+		float sp = width / num;
+		float ox = center.x - (((num - 1) / 2) * sp);
+
+		auto& minima = P.getRelation().getMinima(fol);
+
 		for (auto& f : fol)
 		{
 			ImVec2 pos;
@@ -126,14 +134,21 @@ namespace PPGViz
 
 			if (entry == nodePosMap.end())
 			{
-				pos = ImVec2{ox + (col/num) * 40, center.y};
+				float x = ox + (col * sp);
+				pos = ImVec2{x, center.y};
+				
 				drawNode(f, pos, draw_list);
 				nodePosMap.emplace(f, pos);
 			}
+			else
+			{
+				pos = entry->second;
+			}
+
+			col++;
 
 			auto& next = P.getRelation().getFollowingNodes(f);
-			col++;
-			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ ox + col * 50, center.y + col * 50 });
+			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ pos.x + row * NodeSpacing, pos.y + NodeSpacing }, col, row + 1, sp * (row +1));
 		}
 	}
 	
@@ -150,11 +165,15 @@ namespace PPGViz
 		ImVec2 p0 = ImGui::GetCursorScreenPos();
 		
 		float ox = p0.x + 500.f;
-		float oy = p0.y + 500.f;
-		int col = 0;
-		
-		drawSubgraph(P, nodePosMap, minima, draw_list, ImVec2{ ox,  oy + col * 50 });
+		float oy = p0.y + 50.f;
 
+		size_t col = 0;
+		size_t row = 0;
+		
+		// Draw Nodes
+		drawSubgraph(P, nodePosMap, minima, draw_list, ImVec2{ ox,  oy }, col, row, 1024.f);
+
+		// Draw Arrows
 		for (auto& p : pairs)
 		{
 			auto& entryFirst = nodePosMap.find(p.first);
