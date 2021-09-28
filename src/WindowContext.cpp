@@ -148,7 +148,7 @@ namespace PPGViz
 			col++;
 
 			auto& next = P.getRelation().getFollowingNodes(f);
-			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ pos.x + row * NodeSpacing, pos.y + NodeSpacing }, col, row + 1, sp * (row +1));
+			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ pos.x + NodeSpacing, pos.y + NodeSpacing }, 0, row + 1, sp * (row +1));
 		}
 	}
 	

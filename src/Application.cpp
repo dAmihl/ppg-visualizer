@@ -40,18 +40,7 @@ int main(int, char**)
 			ImGui::End();
 		}
 
-		
 		w.drawPuzzle(*P);
-
-		ImGui::Begin("Overlay");
-
-		auto pDrawList = ImGui::GetWindowDrawList();
-		ImVec2 p0 = ImGui::GetCursorScreenPos();
-		pDrawList->AddRect(ImVec2(p0.x + 10, p0.y+10), ImVec2(p0.x + 100, p0.y + 100), ImColor(255, 0, 0));
-		pDrawList->AddText(ImVec2(p0.x + 10, p0.y + 10), ImColor(255, 0, 0), "test");
-
-		ImGui::End();
-
 		w.render();
 	}
 
