@@ -12,7 +12,7 @@
 namespace PPGViz
 {
 
-	constexpr float NodeSize = 30.f;
+	constexpr float NodeSize = 70.f;
 	constexpr float NodeSpacing = NodeSize * 2 + 30.f;
 
 	class WindowContext

@@ -96,9 +96,9 @@ namespace PPGViz
 			col = colComplete;
 		}
 		draw_list->AddCircle(pos, NodeSize, col);
-		//draw_list->AddRect(pos, ImVec2{ pos.x + size, pos.y + size }, col);
-		PPG::Str desc = n->getRelatedObject().getObjectName() + " : " + n->getRelatedObject().getCurrentState().getName();
-		draw_list->AddText(ImVec2{ pos.x + 5, pos.y + NodeSize / 2 }, col, desc.c_str());
+		//draw_list->AddRect(pos, ImVec2{ pos.x + NodeSize * 2, pos.y + NodeSize * 2 }, col);
+		PPG::Str desc = n->getRelatedObject().getObjectName() + " \n " + n->getRelatedObject().getCurrentState().getName();
+		draw_list->AddText(ImVec2(pos.x - NodeSize/2, pos.y), col, desc.c_str());
 		
 	}
 
@@ -148,7 +148,7 @@ namespace PPGViz
 			col++;
 
 			auto& next = P.getRelation().getFollowingNodes(f);
-			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ pos.x + NodeSpacing, pos.y + NodeSpacing }, 0, row + 1, sp * (row +1));
+			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ pos.x + NodeSpacing + row, pos.y + NodeSpacing }, 0, row + 1, sp * (row +1));
 		}
 	}
 	
@@ -165,7 +165,7 @@ namespace PPGViz
 		ImVec2 p0 = ImGui::GetCursorScreenPos();
 		
 		float ox = p0.x + 500.f;
-		float oy = p0.y + 50.f;
+		float oy = p0.y + 100.f;
 
 		size_t col = 0;
 		size_t row = 0;
