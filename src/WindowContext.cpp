@@ -79,51 +79,92 @@ namespace PPGViz
 		return glfwWindowShouldClose(window);
 	}
 
+	void drawNode(PPG::Ptr<PPG::Node>& n, ImVec2 pos, ImDrawList* draw_list)
+	{
+		float radius = 20.f;
+		ImU32 colInactive = ImGui::GetColorU32(IM_COL32(255, 255, 255, 255));
+		ImU32 colActive = ImGui::GetColorU32(IM_COL32(255, 0, 0, 255));
+		ImU32 colComplete = ImGui::GetColorU32(IM_COL32(0, 255, 0, 255));
+
+		ImU32 col = colInactive;
+		if (n->getCurrentNodeState() == PPG::ENodeState::ACTIVE)
+		{
+			col = colActive;
+		}
+		else if (n->getCurrentNodeState() == PPG::ENodeState::COMPLETED)
+		{
+			col = colComplete;
+		}
+		draw_list->AddCircleFilled(pos, radius, col);
+	}
+
+	void drawArrow(ImVec2 from, ImVec2 to, ImDrawList* draw_list)
+	{
+		IMGUI_API ImU32 colorBlue = ImGui::GetColorU32(IM_COL32(0, 0, 255, 255));
+		IMGUI_API ImU32 colorWhite = ImGui::GetColorU32(IM_COL32(255, 255, 255, 255));
+		
+		float dirX = to.x - from.x;
+		float dirY = to.y - from.y;
+		float len = dirX * dirX + dirY * dirY;
+		ImVec2 arrowDir{ dirX / sqrt(len), dirY / sqrt(len) };
+		ImVec2 headStart{ to.x - 20 * arrowDir.x, to.y - 20 * arrowDir.y };
+		ImVec2 fromStart{ from.x + 20 * arrowDir.x, from.y + 20 * arrowDir.y };
+		draw_list->AddLine(fromStart, headStart, colorWhite, 1.0f);
+		draw_list->AddRectFilled(ImVec2{ headStart.x - 2.5f, headStart.y - 2.5f }, ImVec2{ headStart.x + 2.5f, headStart.y + 2.5f }, colorBlue);
+	}
+
+
+	void drawSubgraph(PPG::Puzzle& P, std::unordered_map<PPG::Ptr<PPG::Node>, ImVec2>& nodePosMap, PPG::Vec<PPG::Ptr<PPG::Node>>& fol, ImDrawList* draw_list, ImVec2 center)
+	{
+		size_t num = fol.size();
+		size_t col = 0;
+		float ox = center.x - (num / 2) * 40;
+		for (auto& f : fol)
+		{
+			ImVec2 pos;
+			auto& entry = nodePosMap.find(f);
+
+			if (entry == nodePosMap.end())
+			{
+				pos = ImVec2{ox + (col/num) * 40, center.y};
+				drawNode(f, pos, draw_list);
+				nodePosMap.emplace(f, pos);
+			}
+
+			auto& next = P.getRelation().getFollowingNodes(f);
+			col++;
+			drawSubgraph(P, nodePosMap, next, draw_list, ImVec2{ ox + col * 50, center.y + col * 50 });
+		}
+	}
+	
 	void WindowContext::drawPuzzle(PPG::Puzzle& P)
 	{
 		std::unordered_map<PPG::Ptr<PPG::Node>, ImVec2> nodePosMap;
-		float radius = 10.f;
-		auto& pairs = P.getRelation().getPairs();
+		auto& nodes = P.getNodes();
+		PPG::NodePairVec pairs = P.getRelation().getPairs();
+		
+		auto& minima = P.getRelation().getMinima(nodes);
+
 		ImGui::Begin("Puzzle Nodes");
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		ImVec2 p0 = ImGui::GetCursorScreenPos();
-		int ox = p0.x + 50;
-		int oy = p0.y + 50;
-		int c = 0;
+		
+		float ox = p0.x + 500.f;
+		float oy = p0.y + 500.f;
+		int col = 0;
+		
+		drawSubgraph(P, nodePosMap, minima, draw_list, ImVec2{ ox,  oy + col * 50 });
+
 		for (auto& p : pairs)
 		{
-			ImVec2 posFirst;
-			ImVec2 posSecond;
 			auto& entryFirst = nodePosMap.find(p.first);
-			auto& entrySecond = nodePosMap.find(p.second);
-			
-			if (entryFirst == nodePosMap.end())
-			{
-				posFirst = ImVec2(ox + (c / 3) * 100, oy + (c % 3) * 100);
-				draw_list->AddCircle(posFirst, radius, ImGui::GetColorU32(IM_COL32(255, 255, 255, 255)));
-				c++;
-				nodePosMap.emplace(p.first, posFirst);
-			}
-			else
-			{
-				posFirst = (*entryFirst).second;
-			}
+			auto& entrySec = nodePosMap.find(p.second);
 
-			if (entrySecond == nodePosMap.end())
-			{
-				posSecond = ImVec2(ox + (c / 3) * 100, oy + (c % 3) * 100);
-				draw_list->AddCircle(posSecond, radius, ImGui::GetColorU32(IM_COL32(255, 255, 255, 255)));
-				c++;
-				nodePosMap.emplace(p.second, posSecond);
-			}
-			else
-			{
-				posSecond = (*entrySecond).second;
-			}
+			if (entryFirst == std::end(nodePosMap) || entrySec == std::end(nodePosMap)) continue;
 
-			draw_list->AddLine(posFirst, posSecond, ImGui::GetColorU32(IM_COL32(255, 255, 255, 255)), 1.0f);
-			
+			drawArrow(entryFirst->second, entrySec->second, draw_list);
 		}
+
 		ImGui::End();
 	}
 
