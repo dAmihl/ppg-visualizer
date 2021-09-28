@@ -14,4 +14,4 @@ The text display helps in case the rendered graph is not enough (or not easily r
 
 Uses GLFW & ImGui.
 
-![Screenshot of first version](\doc\screen0.PNG)
+![Screenshot of first version](doc/screen0.PNG)
